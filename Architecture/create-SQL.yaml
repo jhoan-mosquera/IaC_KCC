@@ -1,0 +1,48 @@
+apiVersion: sql.cnrm.cloud.google.com/v1beta1
+kind: SQLDatabase
+metadata:
+  labels:
+    label-one: "iac-test"
+  name: sql-db-iac
+spec:
+  charset: utf8mb4
+  collation: utf8mb4_bin
+  instanceRef:
+    name: sql-instace-ins2
+---
+apiVersion: sql.cnrm.cloud.google.com/v1beta1
+kind: SQLInstance
+metadata:
+  name: sql-instace-ins2
+spec:
+  region: us-east1
+  databaseVersion: MYSQL_5_7
+  settings:
+    tier: db-f1-micro
+    ipConfiguration:
+      ipv4Enabled: false
+      privateNetworkRef:
+        name: iac-operationtest1
+---
+apiVersion: compute.cnrm.cloud.google.com/v1beta1
+kind: ComputeAddress
+metadata:
+  name: sqlinstance-dep-private-ip
+spec:
+  addressType: INTERNAL
+  location: global
+  purpose: VPC_PEERING
+  prefixLength: 16
+  networkRef:
+    name: iac-operationtest1
+---
+apiVersion: servicenetworking.cnrm.cloud.google.com/v1beta1
+kind: ServiceNetworkingConnection
+metadata:
+  name: sqlinstance-dep-private-ip
+spec:
+  networkRef:
+    name: iac-operationtest1
+  reservedPeeringRanges:
+    - name: sqlinstance-dep-private-ip
+  service: servicenetworking.googleapis.com        
